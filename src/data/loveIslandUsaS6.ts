@@ -1,11 +1,10 @@
 import type { Season } from './types';
 
 /**
- * Love Island USA, Season 6 (2024) — the four finalist couples.
+ * Love Island USA, Season 6 (2024).
  *
- * Statuses were checked against news coverage on 2026-11-22. Reality TV
- * relationships change fast, so every couple carries `lastVerified` and the
- * sources used. Update both when a status changes.
+ * Hand-checked seed data (2026-11-22). The server keeps timelines current
+ * after this; edit here only to correct the baseline.
  */
 export const loveIslandUsaS6: Season = {
   id: 'love-island-usa-6',
@@ -21,6 +20,8 @@ export const loveIslandUsaS6: Season = {
     { id: 'miguel', name: 'Miguel Harichi' },
     { id: 'jana', name: 'JaNa Craig' },
     { id: 'kenny', name: 'Kenny Rodriguez' },
+    { id: 'nicole', name: 'Nicole Jacky' },
+    { id: 'kendall', name: 'Kendall Washington' },
     { id: 'kaylor', name: 'Kaylor Martin' },
     { id: 'aaron', name: 'Aaron Evans' },
   ],
@@ -37,14 +38,10 @@ export const loveIslandUsaS6: Season = {
         {
           date: '2024-07-21',
           title: 'Won Love Island USA Season 6',
-          detail: 'Took home the $100,000 prize.',
+          detail: 'Split the $100,000 prize.',
           kind: 'milestone',
         },
-        {
-          date: '2024-08',
-          title: 'Confirmed relationship at the reunion',
-          kind: 'milestone',
-        },
+        { date: '2024-08', title: 'Confirmed relationship at the reunion', kind: 'milestone' },
         {
           date: '2026-01',
           title: 'Marriage talk',
@@ -85,17 +82,8 @@ export const loveIslandUsaS6: Season = {
           detail: 'Announced they were officially in a relationship.',
           kind: 'milestone',
         },
-        {
-          date: '2025',
-          title: 'Moved in together',
-          detail: 'Living together in California.',
-          kind: 'milestone',
-        },
-        {
-          date: '2026-02',
-          title: 'Grammys red carpet together',
-          kind: 'update',
-        },
+        { date: '2025', title: 'Moved in together', detail: 'Living together in California.', kind: 'milestone' },
+        { date: '2026-02', title: 'Grammys red carpet together', kind: 'update' },
       ],
       sources: [
         {
@@ -118,22 +106,9 @@ export const loveIslandUsaS6: Season = {
       timeline: [
         { date: '2024-06', title: 'Coupled up in the villa', kind: 'villa' },
         { date: '2024-07-21', title: 'Finished third in the finale', kind: 'milestone' },
-        {
-          date: '2025-07',
-          title: 'Starred in Love Island: Beyond the Villa',
-          kind: 'milestone',
-        },
-        {
-          date: '2025-07-27',
-          title: 'Broke up',
-          detail: 'Reports differ on who ended things.',
-          kind: 'split',
-        },
-        {
-          date: '2025-07-29',
-          title: 'Both confirmed the split publicly',
-          kind: 'update',
-        },
+        { date: '2025-07', title: 'Starred in Love Island: Beyond the Villa', kind: 'milestone' },
+        { date: '2025-07-27', title: 'Broke up', detail: 'Reports differ on who ended things.', kind: 'split' },
+        { date: '2025-07-29', title: 'Both confirmed the split publicly', kind: 'update' },
       ],
       sources: [
         {
@@ -147,25 +122,53 @@ export const loveIslandUsaS6: Season = {
       ],
     },
     {
-      id: 'kaylor-aaron',
-      islanderIds: ['kaylor', 'aaron'],
+      id: 'nicole-kendall',
+      islanderIds: ['nicole', 'kendall'],
       status: 'split',
       finalePlacement: 4,
-      headline: 'Split within weeks of leaving the villa.',
+      headline: 'Broke up days after a tense reunion.',
       lastVerified: '2026-11-22',
       timeline: [
         { date: '2024-06', title: 'Coupled up in the villa', kind: 'villa' },
         { date: '2024-07-21', title: 'Finished fourth in the finale', kind: 'milestone' },
         {
           date: '2024-08',
-          title: 'Broke up',
+          title: 'Broke up after the reunion',
+          detail: 'Nicole said Kendall ended things days after the reunion aired.',
           kind: 'split',
         },
       ],
       sources: [
         {
-          label: 'TV Insider — which Season 6 couples are still together',
-          url: 'https://tvinsider.com/gallery/love-island-usa-couples-still-together',
+          label: 'Marie Claire — what happened with Kendall and Nicole',
+          url: 'https://www.marieclaire.com/culture/tv-shows/are-nicole-jacky-kendall-washington-love-island-usa-still-together',
+        },
+      ],
+    },
+    {
+      id: 'kaylor-aaron',
+      islanderIds: ['kaylor', 'aaron'],
+      status: 'split',
+      headline: 'Left the villa together just before the finale, done by the reunion.',
+      lastVerified: '2026-11-22',
+      timeline: [
+        { date: '2024-06', title: 'Coupled up in the villa', kind: 'villa' },
+        { date: '2024-07', title: 'Dumped from the villa before the finale', kind: 'villa' },
+        {
+          date: '2024-08',
+          title: 'Broke up',
+          detail: 'Kaylor confirmed they were "done" before the reunion was filmed.',
+          kind: 'split',
+        },
+      ],
+      sources: [
+        {
+          label: 'TV Insider — Kaylor confirms Aaron split before reunion',
+          url: 'https://tvinsider.com/1148088/love-island-usa-kaylor-aaron-split-reunion-reaction',
+        },
+        {
+          label: 'Marie Claire — are Kaylor and Aaron still dating?',
+          url: 'https://www.marieclaire.com/culture/tv-shows/are-kaylor-martin-aaron-evans-love-island-usa-still-together',
         },
       ],
     },

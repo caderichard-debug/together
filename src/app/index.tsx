@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CoupleCard } from '../components/CoupleCard';
-import { seasons, type Couple } from '../data';
+import { STILL_ON } from '../data';
+import { apiConfigured, useData } from '../lib/data';
 import { useFavorites } from '../lib/favorites';
 import { colors, statusMeta } from '../lib/theme';
 
@@ -14,21 +15,16 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: 'following', label: '★ Following' },
 ];
 
-const STILL_ON: Couple['status'][] = ['together', 'engaged', 'married', 'complicated'];
-
 export default function SeasonScreen() {
-  // One season for now; the data layer already supports more.
-  const season = seasons[0];
+  const { seasons, refreshing, refresh, source, updatedAt } = useData();
+  const [seasonId, setSeasonId] = useState(seasons[0]?.id);
   const [filter, setFilter] = useState<Filter>('all');
   const { isFavorite } = useFavorites();
 
-  const stillOn = season.couples.filter((c) => STILL_ON.includes(c.status)).length;
-  const total = season.couples.length;
+  const season = seasons.find((s) => s.id === seasonId) ?? seasons[0];
 
   const couples = useMemo(() => {
-    const sorted = [...season.couples].sort(
-      (a, b) => (a.finalePlacement ?? 99) - (b.finalePlacement ?? 99),
-    );
+    const sorted = [...season.couples].sort((a, b) => (a.finalePlacement ?? 99) - (b.finalePlacement ?? 99));
     switch (filter) {
       case 'together':
         return sorted.filter((c) => STILL_ON.includes(c.status));
@@ -41,14 +37,38 @@ export default function SeasonScreen() {
     }
   }, [season, filter, isFavorite]);
 
+  const stillOn = season.couples.filter((c) => STILL_ON.includes(c.status)).length;
+
   return (
     <FlatList
       data={couples}
       keyExtractor={(c) => c.id}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+      refreshControl={
+        apiConfigured ? <RefreshControl refreshing={refreshing} onRefresh={() => void refresh()} tintColor={colors.brand} /> : undefined
+      }
       ListHeaderComponent={
         <View style={styles.header}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.seasonTabs}>
+            {seasons.map((s) => {
+              const active = s.id === season.id;
+              return (
+                <Pressable
+                  key={s.id}
+                  onPress={() => setSeasonId(s.id)}
+                  style={[styles.seasonTab, active && styles.seasonTabActive]}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[styles.seasonTabText, active && styles.seasonTabTextActive]}>
+                    {s.showName.replace('Love Island', 'LI')} S{s.seasonNumber}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
           <View style={styles.hero}>
             <Text style={styles.eyebrow}>
               {season.network} · {season.airDates} · {season.location}
@@ -59,19 +79,17 @@ export default function SeasonScreen() {
             </Text>
             <View style={styles.scoreRow}>
               <Text style={styles.score}>
-                {stillOn}/{total}
+                {stillOn}/{season.couples.length}
               </Text>
-              <Text style={styles.scoreLabel}>finalist couples still together</Text>
+              <Text style={styles.scoreLabel}>couples still together</Text>
             </View>
             <View style={styles.meter}>
               {season.couples.map((c) => (
-                <View
-                  key={c.id}
-                  style={[styles.meterSeg, { backgroundColor: statusMeta[c.status].color }]}
-                />
+                <View key={c.id} style={[styles.meterSeg, { backgroundColor: statusMeta[c.status].color }]} />
               ))}
             </View>
           </View>
+
           <View style={styles.filters}>
             {FILTERS.map((f) => (
               <Pressable
@@ -79,9 +97,7 @@ export default function SeasonScreen() {
                 onPress={() => setFilter(f.key)}
                 style={[styles.chip, filter === f.key && styles.chipActive]}
               >
-                <Text style={[styles.chipText, filter === f.key && styles.chipTextActive]}>
-                  {f.label}
-                </Text>
+                <Text style={[styles.chipText, filter === f.key && styles.chipTextActive]}>{f.label}</Text>
               </Pressable>
             ))}
           </View>
@@ -90,9 +106,16 @@ export default function SeasonScreen() {
       renderItem={({ item }) => <CoupleCard season={season} couple={item} />}
       ListEmptyComponent={
         <Text style={styles.empty}>
-          {filter === 'following'
-            ? 'Tap ☆ on a couple to follow them here.'
-            : 'No couples match this filter.'}
+          {filter === 'following' ? 'Tap ☆ on a couple to follow them here.' : 'No couples match this filter.'}
+        </Text>
+      }
+      ListFooterComponent={
+        <Text style={styles.footer}>
+          {source === 'live'
+            ? `Live · updated ${new Date(updatedAt!).toLocaleString()}`
+            : source === 'cache'
+              ? 'Offline · showing last update'
+              : 'Showing built-in data'}
         </Text>
       }
     />
@@ -102,6 +125,16 @@ export default function SeasonScreen() {
 const styles = StyleSheet.create({
   list: { padding: 16, paddingBottom: 48 },
   header: { gap: 16, marginBottom: 16 },
+  seasonTabs: { gap: 8 },
+  seasonTab: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+    backgroundColor: colors.brandSoft,
+  },
+  seasonTabActive: { backgroundColor: colors.brand },
+  seasonTabText: { color: colors.brand, fontWeight: '700', fontSize: 14 },
+  seasonTabTextActive: { color: '#FFFFFF' },
   hero: { backgroundColor: colors.brand, borderRadius: 24, padding: 20, gap: 8 },
   eyebrow: { color: '#FFE3EA', fontSize: 13, fontWeight: '600' },
   title: { color: '#FFFFFF', fontSize: 28, fontWeight: '800', lineHeight: 33 },
@@ -123,4 +156,5 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 14, fontWeight: '600', color: colors.text },
   chipTextActive: { color: '#FFFFFF' },
   empty: { textAlign: 'center', color: colors.textMuted, marginTop: 32, fontSize: 15 },
+  footer: { textAlign: 'center', color: colors.textMuted, marginTop: 24, fontSize: 12 },
 });

@@ -11,6 +11,10 @@ export function CoupleCard({ season, couple }: { season: Season; couple: Couple 
   const { isFavorite, toggleFavorite } = useFavorites();
   const fav = isFavorite(couple.id);
   const split = couple.status === 'split';
+  // Strongest recent social signal, if any (only shown for couples still together).
+  const hotSignal = split
+    ? undefined
+    : [...(couple.signals ?? [])].sort((x, y) => y.severity - x.severity).find((s) => s.severity >= 0.5);
 
   return (
     <Link href={{ pathname: '/couple/[id]', params: { id: couple.id } }} asChild>
@@ -31,7 +35,10 @@ export function CoupleCard({ season, couple }: { season: Season; couple: Couple 
           <Text style={styles.headline} numberOfLines={2}>
             {couple.headline}
           </Text>
-          <StatusBadge status={couple.status} />
+          <View style={styles.badges}>
+            <StatusBadge status={couple.status} />
+            {hotSignal ? <Text style={styles.signal}>👀 {hotSignal.summary}</Text> : null}
+          </View>
         </View>
         <Pressable
           hitSlop={12}
@@ -68,5 +75,7 @@ const styles = StyleSheet.create({
   name: { fontSize: 17, fontWeight: '700', color: colors.text, flexShrink: 1 },
   placement: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
   headline: { fontSize: 14, color: colors.textMuted, lineHeight: 19 },
+  badges: { gap: 6 },
+  signal: { fontSize: 13, color: '#8A5A00', fontWeight: '600' },
   star: { fontSize: 22, color: colors.brand, lineHeight: 24 },
 });
